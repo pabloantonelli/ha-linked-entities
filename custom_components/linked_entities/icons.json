@@ -1,0 +1,17 @@
+{
+  "entity": {
+    "switch": {
+      "group": {
+        "default": "mdi:link-variant",
+        "state": { "off": "mdi:link-variant-off" }
+      },
+      "sync_enabled": {
+        "default": "mdi:sync",
+        "state": { "off": "mdi:sync-off" }
+      }
+    },
+    "sensor": {
+      "last_source": { "default": "mdi:gesture-tap-button" }
+    }
+  }
+}

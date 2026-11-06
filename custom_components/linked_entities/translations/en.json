@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Create a link",
+        "description": "Pick the entities that should mirror each other. Turning any of them on or off turns all of them on or off.",
+        "data": {
+          "name": "Name",
+          "members": "Linked entities (switches, lights, fans, toggles)",
+          "triggers": "Push buttons (optional, each press toggles the link)"
+        }
+      },
+      "settings": {
+        "title": "Link settings",
+        "data": {
+          "primary": "Primary entity",
+          "debounce_ms": "Debounce",
+          "event_types": "Event types that toggle (event entities only)"
+        },
+        "data_description": {
+          "primary": "The entity wired to the physical load. Its state wins at startup and when it reconnects.",
+          "debounce_ms": "Wait this long before propagating, to absorb devices that bounce (on→off→on). 0 propagates immediately.",
+          "event_types": "For event entities, only these event types toggle the link (e.g. press, single). Empty = any event."
+        }
+      }
+    },
+    "error": {
+      "no_members": "Pick at least one entity with an on/off state.",
+      "too_few": "A link needs at least two entities in total.",
+      "already_linked": "One of the entities already belongs to another link. Linking it twice could cause loops."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit link",
+        "data": {
+          "members": "Linked entities (switches, lights, fans, toggles)",
+          "triggers": "Push buttons (optional, each press toggles the link)"
+        }
+      },
+      "settings": {
+        "title": "Link settings",
+        "data": {
+          "primary": "Primary entity",
+          "debounce_ms": "Debounce",
+          "event_types": "Event types that toggle (event entities only)"
+        },
+        "data_description": {
+          "primary": "The entity wired to the physical load. Its state wins at startup and when it reconnects.",
+          "debounce_ms": "Wait this long before propagating, to absorb devices that bounce (on→off→on). 0 propagates immediately.",
+          "event_types": "For event entities, only these event types toggle the link (e.g. press, single). Empty = any event."
+        }
+      }
+    },
+    "error": {
+      "no_members": "Pick at least one entity with an on/off state.",
+      "too_few": "A link needs at least two entities in total.",
+      "already_linked": "One of the entities already belongs to another link. Linking it twice could cause loops."
+    }
+  },
+  "selector": {
+    "primary": {
+      "options": {
+        "none": "None (on if any entity is on)"
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "sync_enabled": { "name": "Sync enabled" }
+    },
+    "sensor": {
+      "last_source": { "name": "Last source" }
+    }
+  }
+}

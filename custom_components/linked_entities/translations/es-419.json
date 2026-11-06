@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Crear un vínculo",
+        "description": "Elige las entidades que se van a espejar. Si enciendes o apagas cualquiera de ellas, se encienden o apagan todas.",
+        "data": {
+          "name": "Nombre",
+          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles)",
+          "triggers": "Pulsadores (opcional, cada pulsación alterna el vínculo)"
+        }
+      },
+      "settings": {
+        "title": "Ajustes del vínculo",
+        "data": {
+          "primary": "Entidad primaria",
+          "debounce_ms": "Debounce",
+          "event_types": "Tipos de evento que alternan (solo entidades event)"
+        },
+        "data_description": {
+          "primary": "La entidad conectada a la carga física. Su estado manda al arrancar y cuando se reconecta.",
+          "debounce_ms": "Tiempo de espera antes de propagar, para absorber dispositivos que rebotan (on→off→on). Con 0 se propaga al instante.",
+          "event_types": "En entidades event, solo estos tipos de evento alternan el vínculo (ej. press, single). Si lo dejas vacío, sirve cualquier evento."
+        }
+      }
+    },
+    "error": {
+      "no_members": "Elige al menos una entidad con estado on/off.",
+      "too_few": "Un vínculo necesita al menos dos entidades en total.",
+      "already_linked": "Una de las entidades ya pertenece a otro vínculo. Vincularla dos veces podría generar bucles."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Editar vínculo",
+        "data": {
+          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles)",
+          "triggers": "Pulsadores (opcional, cada pulsación alterna el vínculo)"
+        }
+      },
+      "settings": {
+        "title": "Ajustes del vínculo",
+        "data": {
+          "primary": "Entidad primaria",
+          "debounce_ms": "Debounce",
+          "event_types": "Tipos de evento que alternan (solo entidades event)"
+        },
+        "data_description": {
+          "primary": "La entidad conectada a la carga física. Su estado manda al arrancar y cuando se reconecta.",
+          "debounce_ms": "Tiempo de espera antes de propagar, para absorber dispositivos que rebotan (on→off→on). Con 0 se propaga al instante.",
+          "event_types": "En entidades event, solo estos tipos de evento alternan el vínculo (ej. press, single). Si lo dejas vacío, sirve cualquier evento."
+        }
+      }
+    },
+    "error": {
+      "no_members": "Elige al menos una entidad con estado on/off.",
+      "too_few": "Un vínculo necesita al menos dos entidades en total.",
+      "already_linked": "Una de las entidades ya pertenece a otro vínculo. Vincularla dos veces podría generar bucles."
+    }
+  },
+  "selector": {
+    "primary": {
+      "options": {
+        "none": "Ninguna (encendido si alguna está encendida)"
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "sync_enabled": { "name": "Sincronización activa" }
+    },
+    "sensor": {
+      "last_source": { "name": "Última fuente" }
+    }
+  }
+}
