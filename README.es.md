@@ -1,4 +1,4 @@
-<p align="center"><img src="brand/icon@2x.png" width="128" alt="Linked Entities"></p>
+<p align="center"><img src="custom_components/linked_entities/brand/icon@2x.png" width="128" alt="Linked Entities"></p>
 
 # Linked Entities
 
@@ -55,7 +55,7 @@ Una entidad solo puede pertenecer a un vínculo, para evitar bucles entre víncu
 
 ## Ícono
 
-Home Assistant toma los íconos de integraciones custom de [home-assistant/brands](https://github.com/home-assistant/brands). Los archivos están en `brand/` y hay que copiarlos a `custom_integrations/linked_entities/` en ese repo.
+La integración trae su propio ícono en `custom_components/linked_entities/brand/` (funciona desde Home Assistant 2026.3; en versiones anteriores se ve un ícono genérico).
 
 ## Desarrollo
 

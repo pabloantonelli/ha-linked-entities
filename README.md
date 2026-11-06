@@ -1,4 +1,4 @@
-<p align="center"><img src="brand/icon@2x.png" width="128" alt="Linked Entities"></p>
+<p align="center"><img src="custom_components/linked_entities/brand/icon@2x.png" width="128" alt="Linked Entities"></p>
 
 # Linked Entities
 
@@ -56,7 +56,7 @@ An entity can only belong to one link, to avoid loops between links.
 
 ## Icon
 
-Home Assistant loads custom integration icons from [home-assistant/brands](https://github.com/home-assistant/brands). The files live in `brand/` and need to be copied to `custom_integrations/linked_entities/` in that repo.
+The integration ships its own icon in `custom_components/linked_entities/brand/` (supported since Home Assistant 2026.3; older versions show a placeholder).
 
 ## Development
 
