@@ -4,67 +4,88 @@
 
 🇬🇧 [English](README.md) · 🇪🇸 **Español**
 
-Integración para Home Assistant que **vincula entidades on/off para que se espejen entre sí**.
-Si encendés o apagás cualquiera de ellas (desde la tecla física, la app, la voz o una
-automatización), se encienden o apagan todas.
+**Hacé que varias teclas, luces o botones funcionen como si fueran uno solo.**
 
-> Caso típico: una tecla inteligente conectada a las luces del quincho y otra tecla "libre",
-> sin carga, en otra parte de la casa. Con un vínculo, las dos se comportan como una sola tecla de combinación.
+Prendés cualquiera y se prenden todas. Apagás cualquiera y se apagan todas.
+Y todas muestran siempre el mismo estado.
 
-## Qué soporta
+---
 
-- **Entidades vinculadas** (se sincronizan en las dos direcciones): `switch`, `light`, `fan`, `input_boolean`, de cualquier protocolo (Wi-Fi, Zigbee, Z-Wave, Matter… se pueden mezclar).
-- **Pulsadores** (cada pulsación alterna el vínculo): `event`, `button`, `input_button`. En las entidades `event` podés filtrar los tipos de evento (ej. `press`, `single`).
-- **Entidad primaria** (opcional): la que tiene la carga física. Su estado manda al arrancar HA y cuando se reconecta.
-- **Anti-bucles**: reconoce sus propios comandos (por `Context`), no envía comandos a entidades que ya están en el estado correcto y absorbe los rebotes de los dispositivos.
-- **`unavailable` / `unknown`** no se propagan nunca. Cuando una entidad vuelve a estar disponible, se resincroniza.
+## ¿Para qué sirve?
 
-Por cada vínculo se crea un dispositivo con:
+### 💡 Una luz, dos teclas
+Tenés una tecla inteligente que prende las luces del quincho y otra tecla inteligente
+en el living que no está conectada a nada.
+Las vinculás y ahora podés prender o apagar las luces del quincho desde cualquiera de las dos.
+Si las prendés desde el quincho, la tecla del living también se marca como prendida.
 
-| Entidad | Para qué sirve |
-|---|---|
-| `switch.<nombre>` | Un solo interruptor que representa y controla todo el vínculo (útil para dashboards y voz) |
-| Switch *Sincronización activa* | Pausar o reanudar la sincronización |
-| Sensor *Última fuente* | Diagnóstico: qué entidad originó el último cambio |
+### 🪜 Escalera o pasillo largo
+Una tecla abajo y otra arriba, como las teclas de combinación de toda la vida,
+pero sin pasar un solo cable nuevo.
 
-La interfaz está en **inglés y español** (`es` y `es-419`, *Español (Latinoamérica)*).
+### 🛏️ Botón en la mesa de luz
+Tenés un botón inalámbrico al lado de la cama.
+Cada vez que lo apretás, prende o apaga la luz del dormitorio (y la tecla de la pared queda igual).
 
-## Instalación (HACS)
+### 🌀 Ventilador y luz juntos
+Vinculás el ventilador de techo con su luz para que se prendan y apaguen juntos.
 
-1. HACS → ⋮ → *Repositorios personalizados* → `https://github.com/pabloantonelli/ha-linked-entities`, categoría **Integration**.
-2. Instalá **Linked Entities** y reiniciá Home Assistant.
-3. Andá a *Ajustes → Dispositivos y servicios → Añadir integración → Linked Entities*.
+---
 
-Instalación manual: copiá `custom_components/linked_entities` a tu carpeta `config/custom_components/`.
+## Cómo se usa
 
-## Uso
+1. Andá a **Ajustes → Dispositivos y servicios → Añadir integración** y buscá **Linked Entities**.
+2. Ponele un nombre (por ejemplo, *Luces quincho*).
+3. Elegí las teclas o luces que querés vincular.
+4. Si tenés botones inalámbricos, agregalos en el campo de pulsadores (es opcional).
+5. Elegí cuál es la tecla **principal**: la que está conectada de verdad a la luz.
+6. Listo. Ya funcionan juntas.
 
-Cada vínculo es una entrada de la integración:
+Podés crear todos los vínculos que quieras, uno por cada grupo de teclas.
+Para cambiar uno, entrá a la integración y tocá **Configurar**.
 
-- **Añadir entrada**: nombre, entidades, pulsadores, entidad primaria, debounce y tipos de evento.
-- **Configurar**: editar un vínculo existente.
-- **⋮ → Eliminar**: borrar el vínculo.
+### Lo que vas a ver
 
-Una entidad solo puede pertenecer a un vínculo, para evitar bucles entre vínculos.
+Cada vínculo aparece como un dispositivo nuevo con:
 
-## ¿Cuándo *no* usar esto?
+- **Un interruptor con el nombre del vínculo** (ej. *Luces quincho*). Prende o apaga todo junto. Es ideal para el panel o para pedírselo al asistente de voz.
+- **Sincronización activa**. Si lo apagás, las teclas dejan de copiarse entre sí hasta que lo vuelvas a prender.
+- **Última fuente**. Te dice qué tecla se usó por última vez.
 
-- **Un solo par y nada más**: alcanza con una automatización (disparador: cambio de estado de A o B → aplicar a la otra).
-- **Todo Zigbee**: el *binding* directo entre dispositivos (ZHA/Z2M) funciona aunque HA esté caído.
-- **Solo querés una entidad que controle varias**, sin que se espejen entre sí: usá un *helper* de grupo.
+---
 
-## Ícono
+## Preguntas frecuentes
 
-La integración trae su propio ícono en `custom_components/linked_entities/brand/` (funciona desde Home Assistant 2026.3; en versiones anteriores se ve un ícono genérico).
+**¿Sirve con cualquier marca?**
+Sí. Si Home Assistant ve la tecla como algo que se prende y se apaga, la podés vincular. Podés mezclar marcas y tipos (Wi-Fi, Zigbee, etc.).
 
-## Desarrollo
+**¿Qué pasa si una tecla se queda sin conexión?**
+Las demás siguen funcionando normalmente. Cuando la tecla vuelve, se pone sola en el estado correcto.
 
-```bash
-uv venv --python 3.13 .venv
-uv pip install --python .venv/bin/python -r requirements_test.txt
-.venv/bin/python -m pytest -q
-```
+**¿Qué pasa si se corta la luz o reinicio Home Assistant?**
+Al volver, todas las teclas se acomodan según la tecla principal.
 
-## Licencia
+**¿Puedo poner la misma tecla en dos vínculos?**
+No. Así se evita que las teclas se queden prendiendo y apagando entre sí.
 
-MIT
+**¿Funciona si Home Assistant está apagado?**
+No: el vínculo lo maneja Home Assistant. La tecla conectada a la luz siempre sigue funcionando, pero las otras no la van a controlar mientras Home Assistant esté apagado.
+
+**¿Necesito esto si solo tengo dos teclas?**
+No es obligatorio. También lo podés hacer con una automatización, pero esta integración lo resuelve en un minuto, sin errores y para todos los casos que quieras.
+
+---
+
+## Instalación
+
+### Con HACS (recomendado)
+1. En HACS, abrí el menú **⋮ → Repositorios personalizados**.
+2. Pegá `https://github.com/pabloantonelli/ha-linked-entities` y elegí **Integración**.
+3. Buscá **Linked Entities**, instalala y reiniciá Home Assistant.
+
+### Manual
+Copiá la carpeta `custom_components/linked_entities` dentro de la carpeta `config/custom_components/` de tu Home Assistant y reinicialo.
+
+---
+
+¿Encontraste un problema o tenés una idea? [Abrí un issue](https://github.com/pabloantonelli/ha-linked-entities/issues).

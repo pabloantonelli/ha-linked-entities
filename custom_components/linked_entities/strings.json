@@ -13,7 +13,7 @@
       "settings": {
         "title": "Link settings",
         "data": {
-          "primary": "Primary entity",
+          "primary": "Main entity",
           "debounce_ms": "Debounce",
           "event_types": "Event types that toggle (event entities only)"
         },
@@ -42,7 +42,7 @@
       "settings": {
         "title": "Link settings",
         "data": {
-          "primary": "Primary entity",
+          "primary": "Main entity",
           "debounce_ms": "Debounce",
           "event_types": "Event types that toggle (event entities only)"
         },

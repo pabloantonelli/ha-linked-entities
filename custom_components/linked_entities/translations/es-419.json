@@ -13,7 +13,7 @@
       "settings": {
         "title": "Ajustes del vínculo",
         "data": {
-          "primary": "Entidad primaria",
+          "primary": "Entidad principal",
           "debounce_ms": "Debounce",
           "event_types": "Tipos de evento que alternan (solo entidades event)"
         },
@@ -42,7 +42,7 @@
       "settings": {
         "title": "Ajustes del vínculo",
         "data": {
-          "primary": "Entidad primaria",
+          "primary": "Entidad principal",
           "debounce_ms": "Debounce",
           "event_types": "Tipos de evento que alternan (solo entidades event)"
         },

@@ -4,68 +4,88 @@
 
 🇬🇧 **English** · 🇪🇸 [Español](README.es.md)
 
-Home Assistant integration that **links on/off entities so they mirror each other**.
-Turn any of them on or off (from the wall switch, the app, voice or an automation)
-and all of them follow.
+**Make several switches, lights or buttons work as if they were one.**
 
-> Typical case: a smart wall switch wired to the patio lights, and a spare smart switch
-> with no load somewhere else in the house. Link them and they behave like a single
-> two-way (multi-location) switch.
+Turn any of them on and they all turn on. Turn any of them off and they all turn off.
+And they always show the same state.
 
-## Features
+---
 
-- **Linked entities** (kept in sync both ways): `switch`, `light`, `fan`, `input_boolean`, from any protocol (Wi-Fi, Zigbee, Z-Wave, Matter… mixed freely).
-- **Push buttons** (each press toggles the link): `event`, `button`, `input_button`. For `event` entities you can filter by event type (e.g. `press`, `single`).
-- **Primary entity** (optional): the one wired to the physical load. Its state wins when Home Assistant starts and when it reconnects.
-- **Loop prevention**: recognises its own commands (via `Context`), never commands entities already in the right state, and absorbs device bounces.
-- **`unavailable` / `unknown`** are never propagated. An entity that comes back online is re-synced.
+## What is it for?
 
-Each link creates a device with:
+### 💡 One light, two switches
+You have a smart switch that controls your patio lights and another smart switch
+in the living room that isn't wired to anything.
+Link them, and now you can turn the patio lights on or off from either one.
+If you turn them on at the patio, the living-room switch shows as on too.
 
-| Entity | Purpose |
-|---|---|
-| `switch.<name>` | A single switch that represents and controls the whole link (handy for dashboards and voice) |
-| *Sync enabled* switch | Pause or resume synchronisation |
-| *Last source* sensor | Diagnostics: which entity caused the last change |
+### 🪜 Stairs or a long hallway
+One switch downstairs and one upstairs, like a classic two-way switch,
+without running a single new wire.
 
-The UI is available in **English and Spanish** (`es` and `es-419`).
+### 🛏️ A button on the nightstand
+You have a wireless button next to your bed.
+Each press turns the bedroom light on or off (and the wall switch stays in step).
 
-## Installation (HACS)
+### 🌀 Fan and light together
+Link the ceiling fan with its light so they turn on and off together.
 
-1. HACS → ⋮ → *Custom repositories* → `https://github.com/pabloantonelli/ha-linked-entities`, category **Integration**.
-2. Install **Linked Entities** and restart Home Assistant.
-3. Go to *Settings → Devices & services → Add integration → Linked Entities*.
+---
 
-Manual install: copy `custom_components/linked_entities` into your `config/custom_components/` folder.
+## How to use it
 
-## Usage
+1. Go to **Settings → Devices & services → Add integration** and search for **Linked Entities**.
+2. Give it a name (for example, *Patio lights*).
+3. Pick the switches or lights you want to link.
+4. If you have wireless buttons, add them in the push buttons field (optional).
+5. Choose the **main** switch: the one actually wired to the light.
+6. Done. They now work together.
 
-Each link is one entry of the integration:
+You can create as many links as you like, one per group of switches.
+To change one, open the integration and tap **Configure**.
 
-- **Add entry**: name, entities, push buttons, primary entity, debounce and event types.
-- **Configure**: edit an existing link.
-- **⋮ → Delete**: remove the link.
+### What you'll see
 
-An entity can only belong to one link, to avoid loops between links.
+Each link shows up as a new device with:
 
-## When *not* to use this
+- **A switch named after the link** (e.g. *Patio lights*). It turns everything on or off together. Great for your dashboard or your voice assistant.
+- **Sync enabled**. Turn it off and the switches stop copying each other until you turn it back on.
+- **Last source**. Shows which switch was used last.
 
-- **Just one pair, nothing else**: a single automation is enough (trigger: state change of A or B → apply to the other).
-- **All Zigbee**: direct device *binding* (ZHA/Z2M) keeps working even if Home Assistant is down.
-- **You only want one entity controlling several**, without them mirroring each other: use a group *helper*.
+---
 
-## Icon
+## FAQ
 
-The integration ships its own icon in `custom_components/linked_entities/brand/` (supported since Home Assistant 2026.3; older versions show a placeholder).
+**Does it work with any brand?**
+Yes. If Home Assistant sees it as something that turns on and off, you can link it. You can mix brands and types (Wi-Fi, Zigbee, etc.).
 
-## Development
+**What if a switch goes offline?**
+The others keep working normally. When it comes back, it sets itself to the right state.
 
-```bash
-uv venv --python 3.13 .venv
-uv pip install --python .venv/bin/python -r requirements_test.txt
-.venv/bin/python -m pytest -q
-```
+**What about a power cut or a Home Assistant restart?**
+When everything is back, all switches line up with the main switch.
 
-## License
+**Can I put the same switch in two links?**
+No. That prevents switches from turning each other on and off in a loop.
 
-MIT
+**Does it work while Home Assistant is off?**
+No: the link is handled by Home Assistant. The switch wired to the light always works, but the others won't control it while Home Assistant is down.
+
+**Do I need this for just two switches?**
+It's not required. You could also do it with an automation, but this integration does it in a minute, without mistakes and for as many cases as you want.
+
+---
+
+## Installation
+
+### With HACS (recommended)
+1. In HACS, open the menu **⋮ → Custom repositories**.
+2. Paste `https://github.com/pabloantonelli/ha-linked-entities` and choose **Integration**.
+3. Search for **Linked Entities**, install it and restart Home Assistant.
+
+### Manual
+Copy the `custom_components/linked_entities` folder into your Home Assistant `config/custom_components/` folder and restart.
+
+---
+
+Found a problem or have an idea? [Open an issue](https://github.com/pabloantonelli/ha-linked-entities/issues).
