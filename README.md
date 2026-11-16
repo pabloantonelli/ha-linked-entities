@@ -71,7 +71,8 @@ When everything is back, all switches line up with the main switch.
 
 **Can they turn on one after another?**
 Yes. In the link settings, set a **delay between entities** (it's 0 by default: all at once).
-They turn on and off following the order of the list; drag them to change it.
+If you flip one switch by hand, the others follow, waiting that long between each one.
+From the link's own switch, they turn on and off following the order of the list; drag them to change it.
 With **turn off in reverse order** enabled, turning off starts from the last one.
 If you press another switch while a sequence is running, the sequence is cancelled and the latest command wins.
 

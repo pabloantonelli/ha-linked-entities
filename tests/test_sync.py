@@ -190,13 +190,29 @@ async def test_step_delay_follows_order(hass: HomeAssistant, booleans, make_entr
     assert all(_state(hass, f"input_boolean.{x}") == STATE_ON for x in "abc")
 
 
-async def test_step_delay_skips_source(hass: HomeAssistant, booleans, make_entry) -> None:
-    """The member that started the change is not waited for."""
-    await make_entry(members=ABC, step_delay_ms=2000)
+async def test_step_delay_from_member(hass: HomeAssistant, booleans, make_entry) -> None:
+    """A member changed by hand waits the delay before the next one follows."""
+    await make_entry(step_delay_ms=5000)
     await _call(hass, "input_boolean", "turn_on", "input_boolean.a")
+    assert _state(hass, "input_boolean.b") == STATE_OFF  # not yet
+    assert hass.states.get("switch.test_link").state == STATE_ON
+    await _advance(hass, 4)
+    assert _state(hass, "input_boolean.b") == STATE_OFF
+    await _advance(hass, 5.1)
     assert _state(hass, "input_boolean.b") == STATE_ON
-    assert _state(hass, "input_boolean.c") == STATE_OFF
+
+
+async def test_step_delay_from_member_chains(
+    hass: HomeAssistant, booleans, make_entry
+) -> None:
+    """The source is skipped; the others follow one delay apart, in order."""
+    await make_entry(members=ABC, step_delay_ms=2000)
+    await _call(hass, "input_boolean", "turn_on", "input_boolean.b")
+    assert _state(hass, "input_boolean.a") == STATE_OFF
     await _advance(hass, 2.1)
+    assert _state(hass, "input_boolean.a") == STATE_ON
+    assert _state(hass, "input_boolean.c") == STATE_OFF
+    await _advance(hass, 4.2)
     assert _state(hass, "input_boolean.c") == STATE_ON
 
 

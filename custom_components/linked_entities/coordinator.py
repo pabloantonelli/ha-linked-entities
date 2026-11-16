@@ -373,7 +373,9 @@ class LinkGroup:
 
         Members are commanded in list order (reversed when turning off if
         `reverse_off` is set), waiting `step_delay` between consecutive
-        commands. A new propagation cancels the one in progress.
+        commands. When a member started the change it counts as the first
+        step, so the delay also applies before the first command. A new
+        propagation cancels the one in progress.
         """
         self._cancel_sequence()
         self.is_on = target
@@ -386,6 +388,17 @@ class LinkGroup:
         self._queue_target = target
         self._queue_context = Context()
         self._notify()
+        if (
+            self.step_delay > 0
+            and source in self.members
+            and self._has_pending_work(target)
+        ):
+            # The source member already changed: it counts as the first step,
+            # so wait before commanding the next one.
+            self._cancel_step = async_call_later(
+                self.hass, self.step_delay, self._step_fired
+            )
+            return
         self._run_sequence()
 
     @callback
