@@ -6,7 +6,7 @@
         "description": "Elige las entidades que se van a espejar. Si enciendes o apagas cualquiera de ellas, se encienden o apagan todas.",
         "data": {
           "name": "Nombre",
-          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles)",
+          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles) — arrástralas para definir el orden",
           "triggers": "Pulsadores (opcional, cada pulsación alterna el vínculo)"
         }
       },
@@ -15,11 +15,15 @@
         "data": {
           "primary": "Entidad principal",
           "debounce_ms": "Debounce",
+          "step_delay_ms": "Retardo entre entidades",
+          "reverse_off": "Apagar en orden inverso",
           "event_types": "Tipos de evento que alternan (solo entidades event)"
         },
         "data_description": {
           "primary": "La entidad conectada a la carga física. Su estado manda al arrancar y cuando se reconecta.",
           "debounce_ms": "Tiempo de espera antes de propagar, para absorber dispositivos que rebotan (on→off→on). Con 0 se propaga al instante.",
+          "step_delay_ms": "Pausa entre encender/apagar una entidad y la siguiente, siguiendo el orden de la lista. Con 0 se hace todo a la vez.",
+          "reverse_off": "Al apagar, ir de la última entidad a la primera (ej. apagar los parlantes antes que el amplificador).",
           "event_types": "En entidades event, solo estos tipos de evento alternan el vínculo (ej. press, single). Si lo dejas vacío, sirve cualquier evento."
         }
       }
@@ -35,7 +39,7 @@
       "init": {
         "title": "Editar vínculo",
         "data": {
-          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles)",
+          "members": "Entidades vinculadas (switches, luces, ventiladores, toggles) — arrástralas para definir el orden",
           "triggers": "Pulsadores (opcional, cada pulsación alterna el vínculo)"
         }
       },
@@ -44,11 +48,15 @@
         "data": {
           "primary": "Entidad principal",
           "debounce_ms": "Debounce",
+          "step_delay_ms": "Retardo entre entidades",
+          "reverse_off": "Apagar en orden inverso",
           "event_types": "Tipos de evento que alternan (solo entidades event)"
         },
         "data_description": {
           "primary": "La entidad conectada a la carga física. Su estado manda al arrancar y cuando se reconecta.",
           "debounce_ms": "Tiempo de espera antes de propagar, para absorber dispositivos que rebotan (on→off→on). Con 0 se propaga al instante.",
+          "step_delay_ms": "Pausa entre encender/apagar una entidad y la siguiente, siguiendo el orden de la lista. Con 0 se hace todo a la vez.",
+          "reverse_off": "Al apagar, ir de la última entidad a la primera (ej. apagar los parlantes antes que el amplificador).",
           "event_types": "En entidades event, solo estos tipos de evento alternan el vínculo (ej. press, single). Si lo dejas vacío, sirve cualquier evento."
         }
       }
@@ -68,10 +76,14 @@
   },
   "entity": {
     "switch": {
-      "sync_enabled": { "name": "Sincronización activa" }
+      "sync_enabled": {
+        "name": "Sincronización activa"
+      }
     },
     "sensor": {
-      "last_source": { "name": "Última fuente" }
+      "last_source": {
+        "name": "Última fuente"
+      }
     }
   }
 }

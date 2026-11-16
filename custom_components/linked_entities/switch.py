@@ -54,11 +54,11 @@ class LinkGroupSwitch(LinkedEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn every member on."""
-        await self.group.async_turn(True, self.entity_id)
+        self.group.async_turn(True, self.entity_id)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn every member off."""
-        await self.group.async_turn(False, self.entity_id)
+        self.group.async_turn(False, self.entity_id)
 
 
 class LinkSyncSwitch(LinkedEntity, SwitchEntity, RestoreEntity):

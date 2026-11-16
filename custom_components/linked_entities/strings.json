@@ -6,7 +6,7 @@
         "description": "Pick the entities that should mirror each other. Turning any of them on or off turns all of them on or off.",
         "data": {
           "name": "Name",
-          "members": "Linked entities (switches, lights, fans, toggles)",
+          "members": "Linked entities (switches, lights, fans, toggles) — drag to set the order",
           "triggers": "Push buttons (optional, each press toggles the link)"
         }
       },
@@ -15,11 +15,15 @@
         "data": {
           "primary": "Main entity",
           "debounce_ms": "Debounce",
+          "step_delay_ms": "Delay between entities",
+          "reverse_off": "Turn off in reverse order",
           "event_types": "Event types that toggle (event entities only)"
         },
         "data_description": {
           "primary": "The entity wired to the physical load. Its state wins at startup and when it reconnects.",
           "debounce_ms": "Wait this long before propagating, to absorb devices that bounce (on→off→on). 0 propagates immediately.",
+          "step_delay_ms": "Pause between turning on/off one entity and the next, following the order of the list. 0 = all at once.",
+          "reverse_off": "When turning off, go from the last entity to the first (e.g. turn off the speakers before the amplifier).",
           "event_types": "For event entities, only these event types toggle the link (e.g. press, single). Empty = any event."
         }
       }
@@ -35,7 +39,7 @@
       "init": {
         "title": "Edit link",
         "data": {
-          "members": "Linked entities (switches, lights, fans, toggles)",
+          "members": "Linked entities (switches, lights, fans, toggles) — drag to set the order",
           "triggers": "Push buttons (optional, each press toggles the link)"
         }
       },
@@ -44,11 +48,15 @@
         "data": {
           "primary": "Main entity",
           "debounce_ms": "Debounce",
+          "step_delay_ms": "Delay between entities",
+          "reverse_off": "Turn off in reverse order",
           "event_types": "Event types that toggle (event entities only)"
         },
         "data_description": {
           "primary": "The entity wired to the physical load. Its state wins at startup and when it reconnects.",
           "debounce_ms": "Wait this long before propagating, to absorb devices that bounce (on→off→on). 0 propagates immediately.",
+          "step_delay_ms": "Pause between turning on/off one entity and the next, following the order of the list. 0 = all at once.",
+          "reverse_off": "When turning off, go from the last entity to the first (e.g. turn off the speakers before the amplifier).",
           "event_types": "For event entities, only these event types toggle the link (e.g. press, single). Empty = any event."
         }
       }
@@ -68,10 +76,14 @@
   },
   "entity": {
     "switch": {
-      "sync_enabled": { "name": "Sync enabled" }
+      "sync_enabled": {
+        "name": "Sync enabled"
+      }
     },
     "sensor": {
-      "last_source": { "name": "Last source" }
+      "last_source": {
+        "name": "Last source"
+      }
     }
   }
 }

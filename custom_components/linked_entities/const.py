@@ -11,8 +11,11 @@ CONF_TRIGGERS: Final = "triggers"
 CONF_PRIMARY: Final = "primary"
 CONF_DEBOUNCE_MS: Final = "debounce_ms"
 CONF_EVENT_TYPES: Final = "event_types"
+CONF_STEP_DELAY_MS: Final = "step_delay_ms"
+CONF_REVERSE_OFF: Final = "reverse_off"
 
 DEFAULT_DEBOUNCE_MS: Final = 300
+DEFAULT_STEP_DELAY_MS: Final = 0
 
 # Entities with an on/off state that are kept in sync bidirectionally.
 STATEFUL_DOMAINS: Final = ["switch", "light", "fan", "input_boolean"]

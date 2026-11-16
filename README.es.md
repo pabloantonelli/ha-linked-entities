@@ -30,6 +30,10 @@ Cada vez que lo apretás, prende o apaga la luz del dormitorio (y la tecla de la
 ### 🌀 Ventilador y luz juntos
 Vinculás el ventilador de techo con su luz para que se prendan y apaguen juntos.
 
+### 🔊 Equipo de música en orden
+Primero tiene que prender el amplificador y unos segundos después los parlantes; al apagar, al revés.
+Ordenás las entidades en la lista, ponés un **retardo entre entidades** y activás **apagar en orden inverso**.
+
 ---
 
 ## Cómo se usa
@@ -64,6 +68,12 @@ Las demás siguen funcionando normalmente. Cuando la tecla vuelve, se pone sola 
 
 **¿Qué pasa si se corta la luz o reinicio Home Assistant?**
 Al volver, todas las teclas se acomodan según la tecla principal.
+
+**¿Puedo hacer que se prendan una después de otra?**
+Sí. En los ajustes del vínculo poné un **retardo entre entidades** (por defecto es 0, todas a la vez).
+Se prenden y apagan en el orden de la lista; podés arrastrarlas para cambiarlo.
+Si activás **apagar en orden inverso**, al apagar se empieza por la última.
+Si tocás otra tecla mientras la secuencia está en curso, la secuencia se cancela y manda la última orden.
 
 **¿Puedo poner la misma tecla en dos vínculos?**
 No. Así se evita que las teclas se queden prendiendo y apagando entre sí.

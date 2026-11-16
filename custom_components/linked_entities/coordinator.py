@@ -34,8 +34,11 @@ from .const import (
     CONF_EVENT_TYPES,
     CONF_MEMBERS,
     CONF_PRIMARY,
+    CONF_REVERSE_OFF,
+    CONF_STEP_DELAY_MS,
     CONF_TRIGGERS,
     DEFAULT_DEBOUNCE_MS,
+    DEFAULT_STEP_DELAY_MS,
     ECHO_WINDOW,
     OWN_CONTEXT_TTL,
 )
@@ -71,6 +74,11 @@ class LinkGroup:
         self.debounce: float = (
             options.get(CONF_DEBOUNCE_MS, DEFAULT_DEBOUNCE_MS) or 0
         ) / 1000
+        # Pause between commanding one member and the next, in list order.
+        self.step_delay: float = (
+            options.get(CONF_STEP_DELAY_MS, DEFAULT_STEP_DELAY_MS) or 0
+        ) / 1000
+        self.reverse_off: bool = bool(options.get(CONF_REVERSE_OFF, False))
 
         self.sync_enabled = True
         self.is_on: bool | None = None
@@ -81,6 +89,11 @@ class LinkGroup:
         self._pending_source: str | None = None
         self._cancel_debounce: CALLBACK_TYPE | None = None
         self._echo_rechecks: dict[str, CALLBACK_TYPE] = {}
+        # Members still to be commanded by the propagation in progress.
+        self._queue: list[str] = []
+        self._queue_target: bool | None = None
+        self._queue_context: Context | None = None
+        self._cancel_step: CALLBACK_TYPE | None = None
         self._unsubs: list[CALLBACK_TYPE] = []
         self._listeners: list[Callable[[], None]] = []
 
@@ -115,6 +128,7 @@ class LinkGroup:
     def async_stop(self) -> None:
         """Stop all listeners and timers."""
         self._cancel_pending()
+        self._cancel_sequence()
         for cancel in self._echo_rechecks.values():
             cancel()
         self._echo_rechecks.clear()
@@ -154,12 +168,14 @@ class LinkGroup:
             self._async_initial_sync()
         else:
             self._cancel_pending()
+            self._cancel_sequence()
         self._notify()
 
-    async def async_turn(self, target: bool, source: str) -> None:
+    @callback
+    def async_turn(self, target: bool, source: str) -> None:
         """Turn the whole group on/off (from the aggregate switch)."""
         self._cancel_pending()
-        await self._async_apply(target, source)
+        self._apply(target, source)
 
     # ------------------------------------------------------------------ #
     # State computation
@@ -202,10 +218,7 @@ class LinkGroup:
             self.is_on = target
             self._notify()
             return
-        self.hass.async_create_task(
-            self._async_apply(target, self.primary or "startup"),
-            eager_start=True,
-        )
+        self._apply(target, self.primary or "startup")
 
     @callback
     def _handle_member_event(self, event: Event[EventStateChangedData]) -> None:
@@ -279,9 +292,7 @@ class LinkGroup:
             self._schedule(entity_id)
             return
         if value != self.is_on:
-            self.hass.async_create_task(
-                self._async_apply(self.is_on, entity_id), eager_start=True
-            )
+            self._apply(self.is_on, entity_id)
 
     @callback
     def _handle_trigger_event(self, event: Event[EventStateChangedData]) -> None:
@@ -303,9 +314,7 @@ class LinkGroup:
         current = self.is_on if self.is_on is not None else self._computed_state()
         target = not bool(current)
         self._cancel_pending()
-        self.hass.async_create_task(
-            self._async_apply(target, event.data["entity_id"]), eager_start=True
-        )
+        self._apply(target, event.data["entity_id"])
 
     # ------------------------------------------------------------------ #
     # Propagation
@@ -314,6 +323,7 @@ class LinkGroup:
     def _schedule(self, source: str) -> None:
         """Propagate the state of `source`, coalescing quick bounces."""
         self._cancel_pending()
+        self._cancel_sequence()
         self._pending_source = source
         if self.debounce <= 0:
             self._fire_pending()
@@ -336,9 +346,7 @@ class LinkGroup:
         value = _on_off(self.hass.states.get(source))
         if value is None:
             return
-        self.hass.async_create_task(
-            self._async_apply(value, source), eager_start=True
-        )
+        self._apply(value, source)
 
     @callback
     def _cancel_pending(self) -> None:
@@ -350,42 +358,108 @@ class LinkGroup:
     @callback
     def _refresh(self) -> None:
         """Recompute the group state without commanding anything."""
+        if self._queue:
+            # Mid-sequence the members are mixed on purpose: keep the target.
+            self._notify()
+            return
         new = self._computed_state()
         if new is not None and new != self.is_on:
             self.is_on = new
         self._notify()
 
-    async def _async_apply(self, target: bool, source: str) -> None:
-        """Command every out-of-sync, available member to `target`."""
+    @callback
+    def _apply(self, target: bool, source: str) -> None:
+        """Command every out-of-sync, available member to `target`.
+
+        Members are commanded in list order (reversed when turning off if
+        `reverse_off` is set), waiting `step_delay` between consecutive
+        commands. A new propagation cancels the one in progress.
+        """
+        self._cancel_sequence()
         self.is_on = target
         self.last_source = source
+
+        order = list(self.members)
+        if not target and self.reverse_off:
+            order.reverse()
+        self._queue = order
+        self._queue_target = target
+        self._queue_context = Context()
         self._notify()
+        self._run_sequence()
 
-        context = Context()
-        self._own_contexts[context.id] = time.monotonic() + OWN_CONTEXT_TTL
-        service = SERVICE_TURN_ON if target else SERVICE_TURN_OFF
-
-        for entity_id in self.members:
+    @callback
+    def _run_sequence(self) -> None:
+        """Command queued members until one needs a pause or the queue ends."""
+        self._cancel_step = None
+        target = self._queue_target
+        context = self._queue_context
+        if target is None or context is None:
+            return
+        while self._queue:
+            entity_id = self._queue.pop(0)
             current = _on_off(self.hass.states.get(entity_id))
             if current is None or current == target:
                 continue
-            self._expected[entity_id] = (target, time.monotonic() + ECHO_WINDOW)
-            domain = entity_id.split(".", 1)[0]
-            try:
-                await self.hass.services.async_call(
-                    domain,
-                    service,
-                    {ATTR_ENTITY_ID: entity_id},
-                    blocking=False,
-                    context=context,
+            self._command(entity_id, target, context)
+            if self.step_delay > 0 and self._has_pending_work(target):
+                self._cancel_step = async_call_later(
+                    self.hass, self.step_delay, self._step_fired
                 )
-            except Exception:  # noqa: BLE001 - one bad member must not stop the rest
-                _LOGGER.exception(
-                    "Linked Entities %s: failed to %s %s",
-                    self.entry.title,
-                    service,
-                    entity_id,
-                )
+                return
+        self._queue_target = None
+        self._queue_context = None
+        self._notify()
+
+    def _has_pending_work(self, target: bool) -> bool:
+        """Return True if a queued member still needs a command."""
+        return any(
+            (v := _on_off(self.hass.states.get(eid))) is not None and v != target
+            for eid in self._queue
+        )
+
+    @callback
+    def _step_fired(self, _now: Any) -> None:
+        self._run_sequence()
+
+    @callback
+    def _cancel_sequence(self) -> None:
+        if self._cancel_step is not None:
+            self._cancel_step()
+            self._cancel_step = None
+        self._queue = []
+        self._queue_target = None
+        self._queue_context = None
+
+    @callback
+    def _command(self, entity_id: str, target: bool, context: Context) -> None:
+        """Send one turn_on/turn_off, tagged so its echo is recognised."""
+        now = time.monotonic()
+        # Refreshed per command so long sequences keep recognising echoes.
+        self._own_contexts[context.id] = now + OWN_CONTEXT_TTL
+        self._expected[entity_id] = (target, now + ECHO_WINDOW)
+        service = SERVICE_TURN_ON if target else SERVICE_TURN_OFF
+        self.hass.async_create_task(
+            self._async_call(entity_id, service, context), eager_start=True
+        )
+
+    async def _async_call(self, entity_id: str, service: str, context: Context) -> None:
+        domain = entity_id.split(".", 1)[0]
+        try:
+            await self.hass.services.async_call(
+                domain,
+                service,
+                {ATTR_ENTITY_ID: entity_id},
+                blocking=False,
+                context=context,
+            )
+        except Exception:  # noqa: BLE001 - one bad member must not stop the rest
+            _LOGGER.exception(
+                "Linked Entities %s: failed to %s %s",
+                self.entry.title,
+                service,
+                entity_id,
+            )
 
     def as_dict(self) -> dict[str, Any]:
         """Return a diagnostics snapshot."""
@@ -395,6 +469,9 @@ class LinkGroup:
             "primary": self.primary,
             "event_types": self.event_types,
             "debounce_s": self.debounce,
+            "step_delay_s": self.step_delay,
+            "reverse_off": self.reverse_off,
+            "pending_members": self._queue,
             "sync_enabled": self.sync_enabled,
             "is_on": self.is_on,
             "last_source": self.last_source,

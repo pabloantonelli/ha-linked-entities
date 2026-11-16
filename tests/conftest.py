@@ -14,6 +14,8 @@ from custom_components.linked_entities.const import (
     CONF_EVENT_TYPES,
     CONF_MEMBERS,
     CONF_PRIMARY,
+    CONF_REVERSE_OFF,
+    CONF_STEP_DELAY_MS,
     CONF_TRIGGERS,
     DOMAIN,
 )
@@ -49,6 +51,8 @@ def make_entry(hass: HomeAssistant):
         primary=None,
         debounce_ms=0,
         event_types=(),
+        step_delay_ms=0,
+        reverse_off=False,
         title="Test link",
     ) -> MockConfigEntry:
         entry = MockConfigEntry(
@@ -61,6 +65,8 @@ def make_entry(hass: HomeAssistant):
                 CONF_PRIMARY: primary,
                 CONF_DEBOUNCE_MS: debounce_ms,
                 CONF_EVENT_TYPES: list(event_types),
+                CONF_STEP_DELAY_MS: step_delay_ms,
+                CONF_REVERSE_OFF: reverse_off,
             },
         )
         entry.add_to_hass(hass)

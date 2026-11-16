@@ -21,8 +21,11 @@ from .const import (
     CONF_EVENT_TYPES,
     CONF_MEMBERS,
     CONF_PRIMARY,
+    CONF_REVERSE_OFF,
+    CONF_STEP_DELAY_MS,
     CONF_TRIGGERS,
     DEFAULT_DEBOUNCE_MS,
+    DEFAULT_STEP_DELAY_MS,
     DOMAIN,
     STATEFUL_DOMAINS,
     TRIGGER_DOMAINS,
@@ -36,7 +39,9 @@ def _entities_schema(defaults: dict[str, Any]) -> dict:
         vol.Required(
             CONF_MEMBERS, default=defaults.get(CONF_MEMBERS, [])
         ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=STATEFUL_DOMAINS, multiple=True)
+            selector.EntitySelectorConfig(
+                domain=STATEFUL_DOMAINS, multiple=True, reorder=True
+            )
         ),
         vol.Optional(
             CONF_TRIGGERS, default=defaults.get(CONF_TRIGGERS, [])
@@ -70,6 +75,21 @@ def _settings_schema(members: list[str], defaults: dict[str, Any]) -> vol.Schema
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            vol.Required(
+                CONF_STEP_DELAY_MS,
+                default=defaults.get(CONF_STEP_DELAY_MS, DEFAULT_STEP_DELAY_MS),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=60000,
+                    step=100,
+                    unit_of_measurement="ms",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Required(
+                CONF_REVERSE_OFF, default=defaults.get(CONF_REVERSE_OFF, False)
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_EVENT_TYPES, default=defaults.get(CONF_EVENT_TYPES, [])
             ): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
@@ -111,6 +131,10 @@ def _clean_settings(user_input: dict[str, Any]) -> dict[str, Any]:
     return {
         CONF_PRIMARY: None if primary in (None, NO_PRIMARY) else primary,
         CONF_DEBOUNCE_MS: int(user_input.get(CONF_DEBOUNCE_MS, DEFAULT_DEBOUNCE_MS)),
+        CONF_STEP_DELAY_MS: int(
+            user_input.get(CONF_STEP_DELAY_MS, DEFAULT_STEP_DELAY_MS)
+        ),
+        CONF_REVERSE_OFF: bool(user_input.get(CONF_REVERSE_OFF, False)),
         CONF_EVENT_TYPES: [
             t.strip() for t in user_input.get(CONF_EVENT_TYPES, []) if t.strip()
         ],

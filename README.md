@@ -30,6 +30,10 @@ Each press turns the bedroom light on or off (and the wall switch stays in step)
 ### 🌀 Fan and light together
 Link the ceiling fan with its light so they turn on and off together.
 
+### 🔊 Sound system in order
+The amplifier has to turn on first and the speakers a few seconds later; when turning off, the other way round.
+Put the entities in that order, set a **delay between entities** and enable **turn off in reverse order**.
+
 ---
 
 ## How to use it
@@ -64,6 +68,12 @@ The others keep working normally. When it comes back, it sets itself to the righ
 
 **What about a power cut or a Home Assistant restart?**
 When everything is back, all switches line up with the main switch.
+
+**Can they turn on one after another?**
+Yes. In the link settings, set a **delay between entities** (it's 0 by default: all at once).
+They turn on and off following the order of the list; drag them to change it.
+With **turn off in reverse order** enabled, turning off starts from the last one.
+If you press another switch while a sequence is running, the sequence is cancelled and the latest command wins.
 
 **Can I put the same switch in two links?**
 No. That prevents switches from turning each other on and off in a loop.

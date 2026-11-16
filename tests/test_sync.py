@@ -167,3 +167,61 @@ async def test_unload(hass: HomeAssistant, booleans, make_entry) -> None:
     await hass.async_block_till_done()
     await _call(hass, "input_boolean", "turn_on", "input_boolean.a")
     assert _state(hass, "input_boolean.b") == STATE_OFF
+
+
+ABC = ("input_boolean.a", "input_boolean.b", "input_boolean.c")
+
+
+async def _advance(hass: HomeAssistant, seconds: float) -> None:
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=seconds))
+    await hass.async_block_till_done()
+
+
+async def test_step_delay_follows_order(hass: HomeAssistant, booleans, make_entry) -> None:
+    """The group switch turns members on one by one, in list order."""
+    await make_entry(members=("input_boolean.c", "input_boolean.a", "input_boolean.b"),
+                     step_delay_ms=2000)
+    await _call(hass, "switch", "turn_on", "switch.test_link")
+    assert [_state(hass, f"input_boolean.{x}") for x in "cab"] == [STATE_ON, STATE_OFF, STATE_OFF]
+    assert hass.states.get("switch.test_link").state == STATE_ON  # target, not mixed
+    await _advance(hass, 2.1)
+    assert [_state(hass, f"input_boolean.{x}") for x in "cab"] == [STATE_ON, STATE_ON, STATE_OFF]
+    await _advance(hass, 4.2)
+    assert all(_state(hass, f"input_boolean.{x}") == STATE_ON for x in "abc")
+
+
+async def test_step_delay_skips_source(hass: HomeAssistant, booleans, make_entry) -> None:
+    """The member that started the change is not waited for."""
+    await make_entry(members=ABC, step_delay_ms=2000)
+    await _call(hass, "input_boolean", "turn_on", "input_boolean.a")
+    assert _state(hass, "input_boolean.b") == STATE_ON
+    assert _state(hass, "input_boolean.c") == STATE_OFF
+    await _advance(hass, 2.1)
+    assert _state(hass, "input_boolean.c") == STATE_ON
+
+
+async def test_reverse_off(hass: HomeAssistant, booleans, make_entry) -> None:
+    await make_entry(members=ABC, step_delay_ms=2000, reverse_off=True)
+    await _call(hass, "switch", "turn_on", "switch.test_link")
+    await _advance(hass, 2.1)
+    await _advance(hass, 4.2)
+    await _advance(hass, 7)  # leave the echo window behind
+    await _call(hass, "switch", "turn_off", "switch.test_link")
+    assert [_state(hass, f"input_boolean.{x}") for x in "abc"] == [STATE_ON, STATE_ON, STATE_OFF]
+    await _advance(hass, 9.2)
+    assert [_state(hass, f"input_boolean.{x}") for x in "abc"] == [STATE_ON, STATE_OFF, STATE_OFF]
+    await _advance(hass, 11.3)
+    assert all(_state(hass, f"input_boolean.{x}") == STATE_OFF for x in "abc")
+
+
+async def test_new_command_cancels_sequence(
+    hass: HomeAssistant, booleans, make_entry
+) -> None:
+    await make_entry(members=ABC, step_delay_ms=2000)
+    await _call(hass, "switch", "turn_on", "switch.test_link")
+    assert _state(hass, "input_boolean.a") == STATE_ON
+    await _call(hass, "switch", "turn_off", "switch.test_link")
+    await _advance(hass, 2.1)
+    await _advance(hass, 4.2)
+    assert all(_state(hass, f"input_boolean.{x}") == STATE_OFF for x in "abc")
+    assert hass.states.get("switch.test_link").state == STATE_OFF
